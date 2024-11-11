@@ -1,0 +1,309 @@
+﻿@page "/employees"
+@using SharedLibrary.DTOs
+@implements IDisposable
+@inject State state
+@inject IJSRuntime JS
+
+<h3>EmployeePage</h3>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+               <div class="card-header">
+                    <h4>Employees</h4>
+                    <button class="btn btn-dark float-end" @onclick="OpenDialog">
+                        <i class="oi oi-plus" aria-hidden="true"></i>
+                        Add Employee
+                    </button>
+                    </div>
+
+
+  <div class="modal fade @(IsVisible ? "show" : "")" tabindex="-1" role="dialog" style="display:@(IsVisible ? "block" : "none")" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">@Title Employee</h5>
+                            <button type="button" class="btn-close" aria-label="Close"  @onclick="CloseDialog"></button>
+                        </div>
+                        <div class="modal-body">
+           <RadzenTemplateForm Data="@Employee" TItem="Employee" Submit="@Save">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />                   
+                        <div class="row">
+                    <div class="col-lg-6">
+                    <div class="card-title mb-5 fw-bold" style="font-family:Tahoma">
+                        Personal Information
+                    </div>
+                    <div class="card-body">
+                                
+                            <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <InputText class="form-control" @bind-Value="Employee.Name" />
+                            <ValidationMessage For="() => Employee.Name" class="text-danger" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="form-label">Telephone</label>
+                            <InputText class="form-control" @bind-Value="Employee.TelephoneNumber" />
+                            <ValidationMessage For="() => Employee.TelephoneNumber" class="text-danger" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="form-label">Address</label>
+                            <InputTextArea class="form-control" @bind-Value="Employee.Address" />
+                            <ValidationMessage For="() => Employee.Address" class="text-danger" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label class="form-label">Civil Id</label>
+                            <InputText class="form-control" @bind-Value="Employee.CivilId" />
+                            <ValidationMessage For="() => Employee.CivilId" class="text-danger" />
+                        </div>
+                       </div>
+                    </div>
+                <div class="col-lg-6">
+                    <div class="card-title mb-5 fw-bold" style="font-family:Tahoma">
+                        Work Information
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Job Name</label>
+                            <InputText class="form-control" @bind-Value="Employee.JobName" />
+                            <ValidationMessage For="() => Employee.JobName" class="text-danger" />
+                        </div>                                           
+
+                         <div class=" form-group mt-3">
+                                        <label for="department" class="form-label">Select Team</label>
+                                        <RadzenDropDown @bind-Value="Employee.BranchId" 
+                                             Data="@Teams" 
+                                             TextProperty="Name" 
+                                             ValueProperty="Id" 
+                                             class="form-control"/>
+                                          <ValidationMessage For="@(() => Employee.BranchId)"/>
+                         </div>
+
+                             <div class="form-group mt-2">
+                            <label class="form-label">Other</label>
+                            <InputText class="form-control" @bind-Value="Employee.Other" />
+                            <ValidationMessage For="() => Employee.Other" class="text-danger" />
+                        </div>
+
+                        </div>
+                        </div>
+                        </div>
+
+
+                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" @onclick="CloseDialog">Cancel</button>
+                                        <RadzenButton Text="Save" Icon="save" ButtonType="ButtonType.Submit" Class="btn btn-primary" />
+                                    </div>
+                                </RadzenTemplateForm>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Telephone</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">CivilId</th>
+                                <th scope="col">JobName</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">Other</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Employees is not  null)
+                            {
+                                int count = 1;
+                                foreach (var item in Employees)
+                                {
+                                    <tr>
+                                        <th scope="row">@count</th>
+                                        <td>@item.Id</td>
+                                        <td>@item.Name</td>
+                                        <td>@item.TelephoneNumber</td>
+                                        <td>@item.Address</td>
+                                        <td>@item.CivilId</td>
+                                        <td>@item.JobName</td>
+                                        <td>@Teams.FirstOrDefault(t => t.Id == item.BranchId)?.Name</td>
+                                        <td>@item.Other</td>
+                                        <td>
+                                            <img src="/images/edit.png" id="CursorIcon"
+                                                 @onclick="()=>EditItem(item)" width="20" height="20" />
+                                            <img src="/images/delete.png" id="CursorIcon"
+                                                 @onclick="()=>DeleteItem(item)" width="20" height="20" />
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="12">
+                                        <div class="alert alert-info text-center">
+                                            No Employees Found! Add a New Employee.
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+    </div>
+</div>
+</div>
+
+
+
+
+<style>
+    #CursorIcon {
+        cursor: pointer;
+        color: #007bff;
+        font-size: 24px;
+        transition: transform 0.2s ease;
+    }
+
+    #CursorIcon:hover {
+        transform: scale(1.2);
+        color: #0056b3;
+    }
+    .modal.show {
+        display: block;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal.fade {
+        display: none;
+    }
+</style>
+
+@code {
+    Employee Employee { get; set; } = new();
+    public string Title { get; set; } = "Add";
+    private bool IsVisible { get; set; } = false;
+
+    public List<Branch> Teams { get; set; } = new();
+    public List<Employee> Employees { get; set; } = new();
+
+    // Open and Close Dialog
+    private void CloseDialog()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    public void OpenDialog()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetEmployees();
+        await GetBranches();
+        state.Action += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        state.Action -= StateHasChanged;
+    }
+
+    // Get all Branches(Teams) and Employees
+    private async Task GetEmployees()
+    {
+        Employees = await employeeService.GetAll(Constants.EmployeeBaseUrl);
+    }
+
+    private async Task GetBranches()
+    {
+        Teams = await branchService.GetAll(Constants.BranchBaseUrl);
+    }
+
+
+    //Save
+    private async Task Save()
+    {
+        if (string.IsNullOrEmpty(Employee.Name) || string.IsNullOrEmpty(Employee.Address) || string.IsNullOrEmpty(Employee.TelephoneNumber) ||  Employee.BranchId==0)
+        {
+            await JS.InvokeVoidAsync("alert", "You need to provide all Information.");
+        }
+        else
+        {
+            await HandleSaveOperationEvent(Employee);
+            CloseDialog(); 
+        }
+    }
+
+    private async Task HandleSaveOperationEvent(Employee employee)
+    {
+        bool successCheck = false;
+        if (employee.Id > 0)
+        {
+            var result = await employeeService.Update(employee, Constants.EmployeeBaseUrl);
+            successCheck = await DisplayMessage(result.Flag, result.Message);
+        }
+        else
+        {
+            var response = await employeeService.Insert(employee, Constants.EmployeeBaseUrl);
+            successCheck = await DisplayMessage(response.Flag, response.Message);
+        }
+
+        if (successCheck)
+        {
+            Employee = new();
+            await GetEmployees();
+            ChangeTitle("Add");
+        }
+    }
+
+    // Edit and Delete an Employee
+    private void EditItem(Employee employee)
+    {
+        ChangeTitle("Update");
+        Employee = employee;
+        OpenDialog();
+    }
+
+    private async Task DeleteItem(Employee employee)
+    {
+        bool confirm = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {employee.Name}?");
+        if (!confirm) return;
+
+        var response = await employeeService.DeleteById(employee.Id, Constants.EmployeeBaseUrl);
+        if (await DisplayMessage(response.Flag, response.Message))
+            await GetEmployees();
+    }
+
+    private async Task<bool> DisplayMessage(bool flag, string message)
+    {
+        if (flag)
+        {
+            await JS.InvokeVoidAsync("alert", "Success");
+            return true;
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Fail");
+            return false;
+        }
+    }
+
+    public void ChangeTitle(string title)
+    {
+        Title = title;
+    }
+
+
+
+    }

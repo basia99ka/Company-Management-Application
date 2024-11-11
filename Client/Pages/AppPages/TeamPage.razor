@@ -1,0 +1,238 @@
+﻿@page "/teamPage"
+@using BaseLibrary.Entities
+@using Client.ApplicationStates
+@implements IDisposable
+@inject State branchState
+@inject IJSRuntime JS
+@inject IGenericServiceInterface<Branch> branchService
+@inject IGenericServiceInterface<Department> departmentService
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Team</h4>
+                    <button class="btn btn-dark float-end" @onclick="OpenDialog">
+                        <i class="oi oi-plus" aria-hidden="true"></i>
+                        Add Team
+                    </button>
+                    </div>
+                    <div class="modal fade @(IsVisible ? "show" : "")" tabindex="-1" role="dialog" style="display:@(IsVisible ? "block" : "none")" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">@Title Team</h5>
+                                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseDialog"></button>
+                                </div>
+                                <div class="modal-body">
+                                     <div class="modal-body">
+                                <RadzenTemplateForm Data="@Branch" TItem="Branch" Submit="@Save">
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary />
+                                    <div class="mb-3">
+                                            <label for="name" class="form-label">Team Name</label>
+                                            <InputText id="name" class="form-control" @bind-Value="Branch.Name" />
+                                            <ValidationMessage For="@(() => Branch.Name)" />
+                                        </div>
+                                    <div class="mb-3">
+                                        <label for="department" class="form-label">Select Department</label>
+                                        <RadzenDropDown @bind-Value="Branch.DepartmentId" 
+                                             Data="@Departments" 
+                                             TextProperty="Name" 
+                                             ValueProperty="Id" 
+                                             class="form-control"/>
+                                          <ValidationMessage For="@(() => Branch.DepartmentId)" />
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" @onclick="CloseDialog">Cancel</button>
+                                        <RadzenButton Text="Save" Icon="save" ButtonType="ButtonType.Submit" Class="btn btn-primary" />
+                                    </div>
+                                </RadzenTemplateForm>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Branches is not null)
+                            {
+                                int count = 1;
+                                foreach (var item in Branches)
+                                {
+                                    <tr>
+                                        <th scope="row">@count</th>
+                                        <td>@item.Id</td>
+                                        <td>@item.Name</td>
+                                        <td>@Departments.FirstOrDefault(d => d.Id == item.DepartmentId)?.Name</td>
+                                        <td>
+                                            <img src="/images/edit.png" id="CursorIcon" @onclick="()=>EditItem(item)" width="20" height="20" />
+                                            <img src="/images/delete.png" id="CursorIcon" @onclick="()=>DeleteItem(item)" width="20" height="20" />
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="alert alert-info text-center">No Team Found! Add New Team</div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    #CursorIcon {
+        cursor: pointer;
+        color: #007bff;
+        font-size: 24px;
+        transition: transform 0.2s ease;
+    }
+
+    #CursorIcon:hover {
+        transform: scale(1.2);
+        color: #0056b3;
+    }
+</style>
+
+@code {
+    Branch Branch { get; set; } = new();
+    public string Title { get; set; } = "Add";
+    private bool IsVisible { get; set; } = false;
+
+    public List<Branch> Branches { get; set; } = new();
+    public List<Department> Departments { get; set; } = new();
+
+    // Open and Close
+
+    private void CloseDialog()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    public void OpenDialog()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetBranches();
+        await GetDepartments();
+        branchState.Action += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        branchState.Action -= StateHasChanged;
+    }
+
+
+    // Get all Branches and Departments
+    private async Task GetBranches()
+    {
+        Branches = await branchService.GetAll(Constants.BranchBaseUrl);
+    }
+
+    private async Task GetDepartments()
+    {
+        Departments = await departmentService.GetAll(Constants.DepartmentBaseUrl);
+    }
+
+    // Save 
+    private async Task Save()
+    {
+        if (string.IsNullOrEmpty(Branch.Name) || Branch.DepartmentId == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "You need to provide Team name and assign a Department.");
+        }
+        else
+        {
+            await HandleSaveOperationEvent(Branch);
+            CloseDialog(); 
+
+        }
+    }
+
+    private async Task HandleSaveOperationEvent(Branch branch)
+    {
+        bool successCheck = false;
+        if (branch.Id > 0)
+        {
+            var result = await branchService.Update(branch, Constants.BranchBaseUrl);
+            successCheck = await DisplayMessage(result.Flag, result.Message);
+        }
+        else
+        {
+            var response = await branchService.Insert(branch, Constants.BranchBaseUrl);
+            successCheck = await DisplayMessage(response.Flag, response.Message);
+        }
+
+        if (successCheck)
+        {
+            Branch = new();
+            await GetBranches();
+            ChangeTitle("Add");
+        }
+    }
+
+    // Edit and Delete Branch
+    private void EditItem(Branch branch)
+    {
+        ChangeTitle("Update");
+        Branch = branch;
+        OpenDialog();
+    }
+
+    private async Task DeleteItem(Branch branch)
+    {
+        bool confirm = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this Team?");
+        if (!confirm) return;
+
+        var response = await branchService.DeleteById(branch.Id, Constants.BranchBaseUrl);
+        if (await DisplayMessage(response.Flag, response.Message))
+            await GetBranches();
+    }
+
+    private async Task<bool> DisplayMessage(bool flag, string message)
+    {
+        if (flag)
+        {
+            await JS.InvokeVoidAsync("alert", "Success");
+            return true;
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Fail");
+            return false;
+        }
+    }
+
+    public void ChangeTitle(string title)
+    {
+        Title = title;
+    }
+}
