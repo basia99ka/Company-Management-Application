@@ -1,4 +1,6 @@
 # Company-Management-Application
+Project is a business application for managing company resources such as projects, departments, teams and employees. The application enables administrators and company users to manage organizational structure and employee information. In the application, users can log in, register, and assign employees to teams, teams to departments, and projects to teams.
+
 - Login page
 ![image](https://github.com/user-attachments/assets/f004f96a-bd66-44eb-ac4c-a5d5f6f03133)
 - Registration page
