@@ -1,5 +1,5 @@
 # Company-Management-Application
-Project is simple business application for managing company resources such as projects, departments, teams and employees. The application enables administrators and company users to manage organizational structure and employee information. In the application, users can log in, register, and assign employees to teams, teams to departments, and projects to teams.
+### Project is simple business application for managing company resources such as projects, departments, teams and employees. The application enables administrators and company users to manage organizational structure and employee information. In the application, users can log in, register, and assign employees to teams, teams to departments, and projects to teams.
 The application is designed according to the principles of Clean Architecture, divided into the following layers. Each layer is implemented as a separate project in C# to ensure modularity, scalability, and maintainability.
 1. Application Layer
 2. Infrastructure Layer
