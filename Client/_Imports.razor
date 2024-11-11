@@ -1,0 +1,41 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Client.ApplicationStates
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using Client
+@using Client.Shared
+@using SharedLibrary.DTOs
+@using ClientLibrary.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
+@using ClientLibrary.Services.Contracts
+@using Microsoft.AspNetCore.Components
+@using BaseLibrary.Entities
+@using Client.Pages.AppPages
+@using Client.Pages.Pages2
+@using Microsoft.AspNetCore.Authorization
+
+@using Radzen 
+@using Radzen.Blazor
+inject Profile profile
+@inject State state
+@inject GetHttpClient getHttpClient
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IUserAccountService accountService
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+
+@*/Authentication*@
+@inject IUserAccountService accountService
+
+
+@*/Deprartment/Branch(team)/Project/Employee*@
+@inject IGenericServiceInterface<Department> departmentService
+@inject IGenericServiceInterface<Branch> branchService
+@inject IGenericServiceInterface<Project> projectService
+@inject IGenericServiceInterface<Employee> employeeService
+ 
