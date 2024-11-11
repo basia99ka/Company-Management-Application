@@ -4,9 +4,8 @@
 - Registration page
 ![image](https://github.com/user-attachments/assets/3db13d2e-326e-4b05-b35c-4e2ef886dd56)
 - Projects Page: Displays a list of projects and their data (team, start date, end date, status and description), allows you to add, delete, edit. The project is assigned to a Team.
-![image](https://github.com/user-attachments/assets/bc458896-711b-4cef-b7ff-c96a9a3f137e)
-![image](https://github.com/user-attachments/assets/b57400cd-8518-4c31-99c8-7f4db53800d6)
 ![image](https://github.com/user-attachments/assets/403197dd-4291-4221-a421-4631db0efe60)
+![image](https://github.com/user-attachments/assets/b57400cd-8518-4c31-99c8-7f4db53800d6)
 - Departments Page: Displays departments in the company, you can add, delete a new one and edit an existing one.
 ![image](https://github.com/user-attachments/assets/b51815a4-f338-4f26-ab76-3fa75b2f3494)
 ![image](https://github.com/user-attachments/assets/03790450-56de-43a6-be93-f7b9b08a928d)
